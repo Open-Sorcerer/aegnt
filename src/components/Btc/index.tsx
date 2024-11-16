@@ -35,7 +35,13 @@ export default function Home() {
         // Call the contract function to get the Bitcoin balance
         const result = await contract.getBitcoinBalance();
         console.log(result);
-        setBalance(ethers.formatUnits(result, 0)); // Assuming the result is in satoshis
+
+        // Format and set the balance (assuming result is in satoshis)
+        const formattedBalance = ethers.formatUnits(result, 0);
+        setBalance(formattedBalance);
+
+        // Redirect to the Blockscout explorer with the pod address
+        //  `https://eth-holesky.blockscout.com/address/${podAddress}`;
       } catch (err) {
         setError("Error fetching Bitcoin balance");
         console.error(err);
