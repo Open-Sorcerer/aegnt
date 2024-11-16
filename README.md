@@ -30,10 +30,11 @@ AgentFi leverages several technologies and protocols:
 
 ### 2. AI Integration
 
-- Natural language processing using MessageKit
-- Contextual understanding of DeFi commands
-- Automated strategy execution
-- Error handling and user-friendly responses
+- Natural language processing using OpenAI's GPT-4o
+- Contextual understanding of DeFi commands and strategies
+- Automated strategy execution 
+- Error handling and user-friendly responses 
+- Used MessageKit and trained AI agent to handle user requests and make investments on their behalf. 
 
 ### 3. Protocol Integrations
 
@@ -41,7 +42,7 @@ AgentFi leverages several technologies and protocols:
 - **CoW Protocol**: MEV-protected trading
 - **Polymarket**: Prediction market interactions
 - **CCIP**: Cross-chain asset transfers
-- **BitDSM**: Bitcoin integration
+- **BitDSM**: Delegate Bitcoin and earn rewards on EVM. 
 
 ### 4. Security & Privacy
 
