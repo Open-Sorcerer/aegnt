@@ -1,15 +1,16 @@
 "use client";
 
 import FlickeringGrid from "@/components/ui/flickering-grid";
-import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
 import { ChevronRight, MessagesSquare } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [value, setValue] = useState("");
+  const router = useRouter();
   return (
     <>
       <FlickeringGrid />
@@ -43,6 +44,7 @@ export default function Home() {
               <button
                 key={index}
                 className="flex flex-col gap-2 w-full h-24 p-3 bg-white/80 border border-neutral-100 rounded-xl"
+                onClick={() => router.push("/chat")}
               >
                 <MessagesSquare size={16} className="text-neutral-400" />
                 <p className="text-left line-clamp-2">
