@@ -5,7 +5,12 @@ import {
   useWaitForTransactionReceipt,
   useSimulateContract,
 } from "wagmi";
-import { BitcoinPodManagerABI, BitcoinPodManagerAddress } from "./constant";
+import {
+  bitcoinPODABI,
+  BitcoinPodManagerABI,
+  BitcoinPodManagerAddress,
+  podAddress,
+} from "./constant";
 import { ethers } from "ethers";
 
 // Fetch Hex from Bech32
@@ -126,4 +131,28 @@ export function usePrepareWithdrawal(podAddress: string, btcAddress: string) {
   return result;
 }
 
-export { createBitDSMAddress, gethexAddress, getApps };
+const fetchBalance = async () => {
+  try {
+    const provider = new ethers.JsonRpcProvider(
+      "https://ethereum-holesky.publicnode.com"
+    );
+
+    const contract = new ethers.Contract(podAddress, bitcoinPODABI, provider);
+
+    const balance = await contract.getBitcoinBalance();
+    const operatorAddress = await contract.getOperator();
+    console.log(operatorAddress);
+    console.log(balance);
+
+    const formattedBalance = ethers.formatUnits(balance, 0);
+
+    return { balance, operatorAddress };
+
+    // Redirect to the Blockscout explorer with the pod address
+    //  `https://eth-holesky.blockscout.com/address/${podAddress}`;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export { createBitDSMAddress, gethexAddress, getApps, fetchBalance };

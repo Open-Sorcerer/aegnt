@@ -1,6 +1,8 @@
 export const BitcoinPodManagerAddress =
   "0x96eae70bc21925dde05602c87c4483579205b1f6";
 
+export const podAddress = "0xC9e2e77cc73C5De29fFB4d952121695C86d24362";
+
 export const BitcoinPodManagerABI = [
   {
     type: "function",
