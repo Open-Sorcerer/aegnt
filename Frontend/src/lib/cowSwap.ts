@@ -1,70 +1,95 @@
 import {
   OrderBookApi,
-  OrderQuoteSideKindSell,
+  OrderQuoteRequest,
   OrderSigningUtils,
   SigningScheme,
   SupportedChainId,
 } from "@cowprotocol/cow-sdk";
-import { Web3Provider } from "@ethersproject/providers";
+import { ethers } from "ethers";
 
-const account = "YOUR_WALLET_ADDRESS";
-const chainId = 100; // Gnosis chain
+async function placeOrder() {
+  const privateKey = "CHANGEME";
 
-const provider = new Web3Provider(window.ethereum);
-const signer = provider.getSigner();
+  const account = "0x22C6bCa436D14B0930906cdFbFA52cBdb414b8F3";
+  const chainId = 11155111;
+  //   //generate sigenr
+  const provider = new ethers.providers.JsonRpcProvider(
+    "https://sepolia.infura.io/v3/"
+  );
+  //   // Generate signer from private key
+  const wallet = new ethers.Wallet(privateKey, provider);
 
-const quoteRequest = {
-  sellToken: "0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1", // WETH gnosis chain
-  buyToken: "0x9c58bacc331c9aa871afd802db6379a98e80cedb", // GNO gnosis chain
-  from: account,
-  receiver: account as string,
-  sellAmountBeforeFee: (0.4 * 10 ** 18).toString(), // 0.4 WETH
-  kind: OrderQuoteSideKindSell.SELL,
-};
+  const quoteRequest = {
+    sellToken: "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+    buyToken: "0x0625afb445c3b6b7b929342a04a22599fd5dbb59",
+    from: account,
+    receiver: account,
+    partiallyFillable: false,
+    priceQuality: "optimal",
+    validFor: 1800,
+    signingScheme: "eip1271",
+    onchainOrder: true,
+    verificationGasLimit: 0,
+    kind: "sell",
+    sellAmountBeforeFee: "20000000000000000",
+  };
+  const orderBookApi = new OrderBookApi({
+    chainId: SupportedChainId.SEPOLIA,
+  });
 
-const orderBookApi = new OrderBookApi({
-  chainId: SupportedChainId.GNOSIS_CHAIN,
-});
-
-async function main() {
   // Get quote
-  const { quote } = await orderBookApi.getQuote(quoteRequest);
+  const { quote } = await orderBookApi.getQuote(
+    quoteRequest as OrderQuoteRequest
+  );
+
+  console.log("Quote: ", quote);
+
+  quote.feeAmount = "0";
 
   // Sign order
   const orderSigningResult = await OrderSigningUtils.signOrder(
     { ...quote, receiver: account },
     chainId,
-    signer
+    wallet as any
   );
 
-  // Send order to the order-book
+  console.log("Order signing result: ", orderSigningResult);
+
+  //   // Send order to the order-book
   const orderUid = await orderBookApi.sendOrder({
     ...quote,
     signature: orderSigningResult.signature,
     signingScheme: orderSigningResult.signingScheme as string as SigningScheme,
   });
 
-  // Get order data
+  console.log("Order UID: ", orderUid);
+
+  //   Get order data
   const order = await orderBookApi.getOrder(orderUid);
 
-  // Get order trades
+  console.log("Order: ", order);
+
+  //   // Get order trades
   const trades = await orderBookApi.getTrades({ orderUid });
-
-  // Sign order cancellation
-  const orderCancellationSigningResult =
-    await OrderSigningUtils.signOrderCancellations([orderUid], chainId, signer);
-
-  // Send order cancellation
-  const cancellationResult = await orderBookApi.sendSignedOrderCancellations({
-    ...orderCancellationSigningResult,
-    orderUids: [orderUid],
-  });
 
   console.log("Results: ", {
     orderUid,
     order,
     trades,
-    orderCancellationSigningResult,
-    cancellationResult,
   });
 }
+
+async function history() {
+  const orderBookApi = new OrderBookApi({
+    chainId: SupportedChainId.SEPOLIA,
+  });
+
+  const history = await orderBookApi.getOrders({
+    owner: "0x22C6bCa436D14B0930906cdFbFA52cBdb414b8F3",
+  });
+
+  console.log("History: ", history);
+}
+
+placeOrder();
+// history();
