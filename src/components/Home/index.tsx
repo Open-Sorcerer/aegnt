@@ -9,6 +9,7 @@ export default function Home() {
   return (
     <>
       <FlickeringGrid />
+
       <div className="relative flex flex-col gap-6 items-center justify-center min-h-screen font-[family-name:var(--font-geist-sans)] z-10">
         <h1 className="text-6xl font-medium text-neutral-700">Aegnt</h1>
         <Input
