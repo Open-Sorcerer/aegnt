@@ -11,6 +11,7 @@ export default function Home() {
   const [balance, setBalance] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [btcAddress, setBtcAddress] = useState<string | null>(null);
 
   const podAddress = "0xC9e2e77cc73C5De29fFB4d952121695C86d24362";
 
@@ -34,11 +35,14 @@ export default function Home() {
 
         // Call the contract function to get the Bitcoin balance
         const result = await contract.getBitcoinBalance();
+        const btcAddress = await contract.getOperator();
+        console.log(btcAddress);
+        setBtcAddress(btcAddress);
         console.log(result);
 
         // Format and set the balance (assuming result is in satoshis)
         const formattedBalance = ethers.formatUnits(result, 0);
-        setBalance(formattedBalance);
+        setBalance((Number(formattedBalance) / 100000000).toString());
 
         // Redirect to the Blockscout explorer with the pod address
         //  `https://eth-holesky.blockscout.com/address/${podAddress}`;
@@ -63,6 +67,7 @@ export default function Home() {
         {loading && <p>Loading...</p>}
         {error && <p className="text-red-500">{error}</p>}
         {balance && <p>Bitcoin Balance: {balance}</p>}
+        {btcAddress && <p>Bitcoin Address: {btcAddress}</p>}
 
         <h1 className="text-6xl font-medium text-neutral-700">Aegnt</h1>
         <Input

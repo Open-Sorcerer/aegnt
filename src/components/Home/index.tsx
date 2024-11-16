@@ -2,10 +2,13 @@
 
 import FlickeringGrid from "@/components/ui/flickering-grid";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import { bitcoinPODABI } from "@/lib/constant";
 
 export default function Home() {
   const [value, setValue] = useState("");
+
   return (
     <>
       <FlickeringGrid />
