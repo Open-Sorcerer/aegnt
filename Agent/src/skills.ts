@@ -22,6 +22,13 @@ export const skills: SkillGroup[] = [
         params: {},
       },
       {
+        skill: "/agent",
+        handler: handleDefi,
+        description: "Create a new AI Agent",
+        examples: ["/agent"],
+        params: {},
+      },
+      {
         skill: "/send [amount] [token]",
         handler: handleDefi,
         description: "Send funds from newly created EOA to user's address",

@@ -2,6 +2,7 @@ import { HandlerContext, SkillResponse } from "@xmtp/message-kit";
 import { parseEther } from "viem";
 import { Coinbase, Wallet, WalletData } from "@coinbase/coinbase-sdk";
 import { Redis } from "@upstash/redis";
+import { createTBA, mintNFT } from "../strategies/handleTBA.js";
 
 const coinbase = Coinbase.configureFromJson({
   filePath: "./cdp_api_key-agent.json",
@@ -27,7 +28,9 @@ export async function handleDefi(
   switch (skill) {
     case "create": {
       // Generate new wallet
-      const wallet = await Wallet.create();
+      const wallet = await Wallet.create({
+        networkId: Coinbase.networks.BaseSepolia,
+      });
 
       const exportedWallet = wallet.export();
 
@@ -36,6 +39,21 @@ export async function handleDefi(
       return {
         code: 200,
         message: `✅ New wallet created!\n\nAddress: ${wallet.getId()}\n\nUse /fund to see where to send funds to this wallet.`,
+      };
+    }
+
+    case "agent": {
+      const wallet = await redis.get(sender.address);
+
+      await mintNFT(wallet as WalletData, sender.address);
+
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      const tba = await createTBA(wallet as WalletData, 8, 0);
+
+      return {
+        code: 200,
+        message: `✅ New AI Agent Created 🎉`,
+        // message: `✅ New AI Agent Created 🎉\n\nTBA Address: ${tba?.tbaAddress}\n\nTBA Creation Tx: ${tba?.hash}`,
       };
     }
 
@@ -50,9 +68,11 @@ export async function handleDefi(
 
       const walletImported = await Wallet.import(wallet as WalletData);
 
+      const defaultAddress = await walletImported.getDefaultAddress();
+
       return {
         code: 200,
-        message: `💰 Send funds to this address:\n\n${walletImported.getId()}`,
+        message: `💰 Send funds to this address:\n\n${defaultAddress.getId()}`,
       };
     }
 
