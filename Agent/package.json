@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@coinbase/coinbase-sdk": "^0.10.0",
+    "@polymarket/clob-client": "^4.11.0",
     "@upstash/redis": "^1.34.3",
     "@xmtp/message-kit": "latest",
     "dotenv": "^16.4.5",
