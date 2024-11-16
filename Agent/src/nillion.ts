@@ -27,7 +27,7 @@ async function registerApp() {
 }
 
 // Store a secret using Nillion Storage API
-async function storeSecret(
+export async function storeSecret(
   USER_SEED: string,
   SECRET_VALUE: Record<string, any>
 ) {
@@ -59,7 +59,7 @@ async function storeSecret(
     }
 
     const data = await response.json();
-    console.log("Secret Store ID:", data);
+    return data;
   } catch (error) {
     console.error("Error storing secret:", error);
     throw error;
@@ -67,7 +67,7 @@ async function storeSecret(
 }
 
 // Retrieve a secret using Nillion Storage API
-async function retrieveSecret(USER_SEED: string, store_id: string) {
+export async function retrieveSecret(USER_SEED: string, store_id: string) {
   /* List all the stores of this registered app from Nillion */
   //   const storeId = await fetch(`${API_BASE}/api/apps/${APP_ID}/store_ids`)
   //     .then((res) => res.json())
@@ -83,17 +83,9 @@ async function retrieveSecret(USER_SEED: string, store_id: string) {
     }
 
     const secret = (await response.json()) as Record<string, any>;
-    console.log("Secret retrieved:", JSON.parse(secret.secret).secret);
-    return secret;
+    return JSON.parse(secret.secret).secret;
   } catch (error) {
     console.error("Error retrieving secret:", error);
     throw error;
   }
 }
-
-// storeSecret(process.env.WALLET_ADDRESS ?? "", { secret: "kodak" });
-
-// retrieveSecret(
-//   process.env.WALLET_ADDRESS ?? "",
-//   "a1d505cb-a84d-4aed-bf16-4d202e8a2b4b"
-// );
