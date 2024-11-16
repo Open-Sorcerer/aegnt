@@ -71,8 +71,8 @@ export const createTBA = async (
       implementation: IMPLEMENTATION_ADDRESS,
       chainId: client.getChainId().toString(), // Convert to BigInt and then to string
       tokenContract: ERC721_ADDRESS,
-      tokenId: "8",
-      salt: "0",
+      tokenId: tokenId.toString(),
+      salt: salt.toString(),
       initData: "0x",
     },
   });
