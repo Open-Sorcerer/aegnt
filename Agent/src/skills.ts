@@ -96,13 +96,6 @@ export const skills: SkillGroup[] = [
         },
       },
       {
-        skill: "/investments",
-        handler: handleDefi,
-        description: "Check investment details",
-        examples: ["/investments"],
-        params: {},
-      },
-      {
         skill: "/balance",
         handler: handleDefi,
         description: "Check wallet balance",
@@ -168,6 +161,27 @@ export const skills: SkillGroup[] = [
             type: "string",
           },
           token1: {
+            type: "string",
+          },
+        },
+      },
+      {
+        skill: "/polymarket",
+        handler: handleDefi,
+        description: "Trending markets on Polymarket",
+        examples: ["/polymarket"],
+        params: {},
+      },
+      {
+        skill: "/scroll [amount] [token]",
+        handler: handleDefi,
+        description: "Invest on Scroll",
+        examples: ["/scroll 1 USDC"],
+        params: {
+          amount: {
+            type: "number",
+          },
+          token: {
             type: "string",
           },
         },

@@ -6,8 +6,9 @@ import { createTBA, mintNFT } from "../strategies/handleTBA.js";
 import { bridgeToPolygon } from "../strategies/ccipBridge.js";
 import { makeInvestment } from "../strategies/investment.js";
 import { fetchBalance } from "../strategies/bitDSM.js";
-import { placeOrder } from "../strategies/polymarket.js";
+import { getMarkets, placeOrder } from "../strategies/polymarket.js";
 import { placeOrder as placeCowOrder } from "../strategies/cowSwap.js";
+import { investOnScroll } from "../strategies/compound.js";
 
 const coinbase = Coinbase.configureFromJson({
   filePath: "./cdp_api_key-agent.json",
@@ -176,7 +177,7 @@ export async function handleDefi(
 
       return {
         code: 200,
-        message: `✅ Invested ${amount} ${token} successfully to generate high yield!\n\nTransaction hash: ${hash}`,
+        message: `✅ Invested ${amount} ${token} successfully to generate high yield!\n\nTransaction hash: https://base.blockscout.com/tx/${hash}`,
       };
     }
 
@@ -207,11 +208,9 @@ export async function handleDefi(
 
       const placedBet = await placeOrder();
 
-      console.log("placedBet", placedBet);
-
       return {
         code: 200,
-        message: `✅ Bet placed successfully on Polymarket!\n`,
+        message: `✅ Bet placed successfully on Polymarket!\n\nCheck txn on blockscout: https://polygon.blockscout.com/tx/${placedBet}`,
       };
     }
 
@@ -235,29 +234,33 @@ export async function handleDefi(
         assetId: token,
       });
 
-      // await walletImported.createTransfer({
-      //   amount: parseUnits(ethBalance.toString(), 18),
-      //   destination: sender.address as `0x${string}`,
-      //   assetId: "eth",
-      // });
-
       return {
         code: 200,
         message: `✅ Withdrawal made successfully!`,
       };
     }
 
-    case "investments": {
-      return {
-        code: 200,
-        message: `✅ Investment details fetched successfully!`,
-      };
-    }
-
     case "balance": {
+      const wallet = await redis.get(sender.address);
+
+      const walletImported = await Wallet.import(wallet as WalletData);
+
+      const balances = await walletImported.listBalances();
+
+      console.log(
+        "balances",
+        Array.from(balances).map(
+          ([assetId, balance]) => `${assetId} - ${balance.toString()}`
+        )
+      );
+
       return {
         code: 200,
-        message: `✅ Wallet balance fetched successfully!`,
+        message: `✅ Wallet balance fetched successfully!\n\nBalance: ${Array.from(
+          balances
+        ).map(
+          ([assetId, balance]) => `\n${assetId} - ${Number(balance).toFixed(5)}`
+        )}`,
       };
     }
 
@@ -268,7 +271,7 @@ export async function handleDefi(
 
       return {
         code: 200,
-        message: `✅ Bitcoin balance fetched successfully!\n\nBalance: ${balance?.formattedBalance} BTC`,
+        message: `✅ Bitcoin balance fetched successfully!\n\nBalance: ${balance?.formattedBalance} BTC\n\nVerify here: https://eth-holesky.blockscout.com/address/0x4d9627FbE2199300d33B655481a557C905CE1A11`,
       };
     }
 
@@ -323,7 +326,7 @@ export async function handleDefi(
 
       return {
         code: 200,
-        message: `✅ Bridged ${amount} USDC to Polygon!\n\nTransaction hash: ${hash}`,
+        message: `✅ Bridged ${amount} USDC to Polygon!\n\nCheck txn on CCIP: https://ccip.chain.link/tx/${hash}`,
       };
     }
 
@@ -346,7 +349,45 @@ export async function handleDefi(
 
       return {
         code: 200,
-        message: `✅ Trade made successfully!\n\nTransaction hash: ${hash}`,
+        message: `✅ Trade made successfully!\n\nCheck txn: https://sepolia.etherscan.io/tx/0x6b224bdb191f04c5d3c7866fd6c31e95d719f7d3694681ce3830c5de7fd26141`,
+      };
+    }
+
+    case "polymarket": {
+      const markets = await getMarkets();
+
+      return {
+        code: 200,
+        message: `✅ Trending markets on Polymarket fetched successfully!\n\nBitcoin Price Target
+Question: Will Bitcoin hit $100k in 2024?
+Description: Market resolves "Yes" if any Coinbase 1-minute candle for BTC-USD shows a high of $100,000+ between Jan 1 and Dec 31, 2024 ET. Resolution based on Coinbase BTC-USD data, with alternative sources considered only if major discrepancies exist.\n\n
+Boeing CEO Status
+Question: Dave Calhoun out as Boeing CEO before May?
+Description: Resolves "Yes" if Dave Calhoun stops serving as Boeing CEO between March 8 and April 30, 2024 (11:59 PM ET). Any announcement of resignation/firing before the end date triggers immediate "Yes" resolution, regardless of effective date.\n\n
+NFL Player Transfer
+Question: Will the Atlanta Falcons sign Kirk Cousins?
+Description: Resolves "Yes" if Kirk Cousins signs with the Atlanta Falcons between March 10, 2024, and the NFL regular season start (Sept 5, 2024). Resolves "No" if he signs with any other team first. Resolution based on official NFL/team announcements or credible reporting consensus.
+All markets are currently active on Polymarket, with the Bitcoin market being the only one still open for trading.`,
+      };
+    }
+
+    case "scroll": {
+      const {
+        message: {
+          content: { params },
+        },
+      } = context;
+
+      const amount = params.amount.toString();
+      const token = params.token;
+
+      const formattedAmount = parseUnits(amount, 6).toString();
+
+      const hash = await investOnScroll(Number(formattedAmount));
+
+      return {
+        code: 200,
+        message: `✅ Invested ${amount} ${token} on Scroll successfully!\n\nCheck txn: https://scroll.blockscout.com/tx/${hash}`,
       };
     }
 

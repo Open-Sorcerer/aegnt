@@ -39,7 +39,6 @@ export async function agent_prompt(senderAddress: string) {
    - Make smart investments: /smart [amount] [token]
    - Place a bet on polymarket: /bet [amount]
    - Withdraw from wallet: /withdraw [amount] [token]
-   - Check investment details: /investments
    - Check wallet balance: /balance
    - Make Bitcoin deposits: /deposit
    - Make Bitcoin withdrawals: /withdrawbtc
@@ -47,6 +46,8 @@ export async function agent_prompt(senderAddress: string) {
    - Check Bitcoin balance: /btc
    - Bridge funds to Polygon: /bridge [amount] [token]
    - Trade tokens: /trade [amount] [token] to [token1]
+   - Trending markets on Polymarket: /polymarket
+   - Invest on Scroll: /scroll [amount] [token]
 
 ## Most common bugs
 

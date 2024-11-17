@@ -1,4 +1,12 @@
-import { createPublicClient, getContract, http, parseAbi } from "viem";
+import {
+  createPublicClient,
+  createWalletClient,
+  getContract,
+  http,
+  parseAbi,
+  parseEther,
+  parseUnits,
+} from "viem";
 import {
   baseCCIPContractAddress,
   chainsByNetwork,
@@ -9,6 +17,9 @@ import {
   USDC_ADDRESSES,
 } from "../constant.js";
 import { Wallet, WalletData } from "@coinbase/coinbase-sdk";
+import { scroll } from "viem/chains";
+import { privateKeyToAccount, privateKeyToAddress } from "viem/accounts";
+import { waitForTransactionReceipt } from "viem/actions";
 
 const NETWORK = Network.BASE;
 const COMPOUND_CONTRACT = COMPOUND_ADDRESSES[NETWORK] as `0x${string}`;
@@ -95,4 +106,41 @@ export async function withdrawCollateral(
   await withdrawTxn.wait();
 
   return withdrawTxn.getTransactionHash();
+}
+
+export async function investOnScroll(amount: number) {
+  const walletClient = createWalletClient({
+    account: privateKeyToAccount(process.env.KEY as `0x${string}`),
+    chain: scroll,
+    transport: http(),
+    pollingInterval: 10000,
+  });
+
+  const approveUSDC = await walletClient.writeContract({
+    address: USDC_ADDRESSES[Network.SCROLL] as `0x${string}`,
+    abi: USDC_ABI,
+    functionName: "approve",
+    args: [COMPOUND_ADDRESSES[Network.SCROLL] as `0x${string}`, amount],
+    maxFeePerGas: BigInt(200000000000), // Increased from 100 to 200 gwei
+    maxPriorityFeePerGas: BigInt(200000000000),
+  });
+
+  await waitForTransactionReceipt(walletClient, {
+    hash: approveUSDC,
+  });
+
+  const depositTxn = await walletClient.writeContract({
+    address: COMPOUND_ADDRESSES[Network.SCROLL] as `0x${string}`,
+    abi: COMPOUND_COMET_ABI,
+    functionName: "supply",
+    args: [USDC_ADDRESSES[Network.SCROLL] as `0x${string}`, amount],
+    maxFeePerGas: BigInt(200000000000),
+    maxPriorityFeePerGas: BigInt(200000000000),
+  });
+
+  await waitForTransactionReceipt(walletClient, {
+    hash: depositTxn,
+  });
+
+  return depositTxn;
 }

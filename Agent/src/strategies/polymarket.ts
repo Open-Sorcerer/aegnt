@@ -51,7 +51,9 @@ async function placeBUYOrder(
 async function getMarkets() {
   const orders = await clobClient.getMarkets();
   console.log("orders : ", orders);
-  return orders;
+
+  // return top 5 markets which are under data
+  return orders.data.slice(0, 5);
 }
 
 async function getMarket(marketId: string) {
@@ -65,16 +67,16 @@ async function placeOrder() {
     "0x9c66114d2dfe2139325cc7a408a5cd5d2e73b55d919e2141b3a0ed83fc15895d"
   );
 
-  console.log("Market", o);
+  console.log("Market", o.tokens[0].price);
 
   const resp = await placeBUYOrder(
     clobClient,
-    "64903093311385616430821497488306433314807585397286521531639186532059591846310",
-    0.61,
+    o.tokens[0].token_id,
+    o.tokens[0].price,
     1
   );
 
-  return resp;
+  return resp.transactionsHashes[0];
 }
 
 export { placeOrder, getMarkets, getMarket };
